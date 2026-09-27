@@ -1,0 +1,8 @@
+{
+  "startedAt": "2026-09-27T16:01:04.889Z",
+  "model": "bytedance/seedance-2.5/text-to-video",
+  "duration": 8,
+  "resolution": "720p",
+  "aspect_ratio": "16:9",
+  "generate_audio": false
+}

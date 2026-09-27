@@ -1,0 +1,8 @@
+{
+  "model": "bytedance/seedance-2.0/text-to-video",
+  "duration": 10,
+  "resolution": "4k",
+  "aspect_ratio": "16:9",
+  "generate_audio": false,
+  "promptFile": "seedance-2-prompt.txt"
+}

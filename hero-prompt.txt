@@ -1,0 +1,15 @@
+Create a cinematic, photorealistic establishing shot for the homepage of a London street-interview and quiz channel.
+
+The setting is a contemporary pedestrian street in central London at late afternoon, with warm sunlight touching pale stone architecture, subtly textured paving, understated shopfronts, and soft reflections in windows. The atmosphere is lively, intelligent, welcoming, and authentic. The street feels lived in, with a few distant adult pedestrians naturally walking through the background, softly out of focus. Avoid prominent landmarks and tourist-postcard compositions.
+
+In the right-hand third of the frame, place a premium handheld interview microphone resting upright in a discreet support that stays outside the frame. It has a realistic dark charcoal metal mesh grille, a matte black handle, and a clean, unmarked square microphone flag in warm off-white. The microphone is the unmistakable focal point. Maintain physically accurate proportions, fine material detail, and a consistent silhouette throughout the shot. There is no interviewer's hand and no visible presenter.
+
+Compose the image for a widescreen website hero. Keep the left half of the frame visually calm, softly shaded, and uncluttered so large white website text can be placed there later. Keep the microphone grille and flag fully inside the frame with comfortable space around them; the lower handle can extend beyond the bottom edge to the unseen support. Background architectural lines should create gentle depth without distracting from the foreground.
+
+Across eight seconds, use a single uninterrupted shot: hold the opening composition briefly, then make a slow, controlled push towards the microphone with slight lateral drift and subtle natural parallax. Ease into a steady final composition during the last two seconds, preserving clear space on the left for website text. Movement must be smooth, deliberate, and minimal. No cuts, sudden zooms, orbit, handheld shake, or dramatic focus changes. The microphone remains steady and sharp while distant pedestrians move naturally.
+
+Lighting combines warm sunlight on the edges of the microphone with soft, neutral shadow detail. Use realistic exposure, restrained contrast, natural colour, subtle cinematic grain, and a shallow but believable depth of field. Preserve a premium editorial look without exaggerated lens flare, neon lighting, or artificial glossy surfaces.
+
+The emotional impression is that someone is about to ask an interesting question and the viewer is invited to participate. End with the microphone slightly closer while maintaining the same composition and clear space on the left.
+
+Do not generate lettering, logos, watermarks, subtitles, interface elements, posters with readable text, flags, or brand names. Do not depict recognisable public figures. Avoid distorted faces, malformed objects, flickering textures, duplicated pedestrians, unstable architecture, or changing microphone geometry. No speech, music, or sound effects.
