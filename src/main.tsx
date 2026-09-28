@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { officialLinks, places, questions, videos, type VideoCategory } from "./content";
 import "./styles.css";
+import { useBufferedFilm } from './useBufferedFilm';
 
 const Arrow = ({ diagonal = false }: { diagonal?: boolean }) => <span aria-hidden="true" className="arrow">{diagonal ? "↗" : "→"}</span>;
 
@@ -37,16 +38,18 @@ function Header() {
 function ScrollFilm() {
   const frameRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const meterRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(10.04);
   const [ready, setReady] = useState(false);
   const [mediaAvailable, setMediaAvailable] = useState(false);
   const [open, setOpen] = useState(false);
   const reduced = useReducedMotion();
+  const { source, failed, retry, useNativeSource } = useBufferedFilm(!reduced);
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || reduced) return;
+    if (!video || reduced || !source) return;
     let attempts = 0;
     let retryTimer = 0;
     const loaded = () => { attempts = 0; setMediaAvailable(true); };
@@ -79,7 +82,7 @@ function ScrollFilm() {
       window.removeEventListener('pageshow', resume);
       document.removeEventListener('visibilitychange', resume);
     };
-  }, [reduced]);
+  }, [reduced, source]);
 
   useEffect(() => {
     if (reduced) return;
@@ -91,26 +94,35 @@ function ScrollFilm() {
     let lastTime = 0;
     let range = 1;
     let top = 0;
+    let currentStage = -1;
     const measure = () => {
       top = frame.getBoundingClientRect().top + window.scrollY;
       range = Math.max(1, frame.offsetHeight - window.innerHeight);
     };
     const seek = () => {
-      if (video.readyState < 2 || video.seeking) return;
+      if (document.hidden || open || video.readyState < 2 || video.seeking) return;
       const distance = target - video.currentTime;
       if (Math.abs(distance) < 1 / 48) return;
       // Finish one decode before seeking again; consume the newest scroll target.
       const now = performance.now();
-      const elapsed = Math.min(64, Math.max(16, now - lastTime));
+      const elapsed = Math.min(200, Math.max(16, now - lastTime));
       lastTime = now;
       const eased = video.currentTime + distance * (1 - Math.exp(-elapsed / 65));
-      video.currentTime = Math.abs(distance) < .08 ? target : eased;
+      video.currentTime = !source?.startsWith('blob:') || elapsed > 80 || Math.abs(distance) < .08 ? target : eased;
     };
     const update = () => {
       raf = 0;
       const next = Math.min(1, Math.max(0, (window.scrollY - top) / range));
-      setProgress(previous => Math.abs(previous - next) > .003 ? next : previous);
+      // Only text/chapter changes need React. The meter stays on the compositor.
+      const stage = next > .7 ? 3 : next >= .66 ? 2 : next >= .29 ? 1 : 0;
+      if (stage !== currentStage) { currentStage = stage; setProgress(next); }
+      const meter = meterRef.current;
+      if (meter) {
+        meter.style.setProperty('--film-progress', String(next));
+        meter.setAttribute('aria-valuenow', String(Math.round(next * 100)));
+      }
       target = next * Math.max(0, duration - 0.05);
+      if (window.scrollY > top + range + window.innerHeight || document.hidden || open) return;
       seek();
     };
     const schedule = () => { if (!raf) raf = window.requestAnimationFrame(update); };
@@ -119,11 +131,12 @@ function ScrollFilm() {
     measure();
     video.addEventListener("seeked", settled);
     video.addEventListener("loadeddata", schedule);
+    video.addEventListener("canplay", schedule);
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", resize);
     schedule();
-    return () => { window.removeEventListener("scroll", schedule); window.removeEventListener("resize", resize); video.removeEventListener("seeked", settled); video.removeEventListener("loadeddata", schedule); if (raf) cancelAnimationFrame(raf); };
-  }, [duration, reduced, ready]);
+    return () => { window.removeEventListener("scroll", schedule); window.removeEventListener("resize", resize); video.removeEventListener("seeked", settled); video.removeEventListener("loadeddata", schedule); video.removeEventListener("canplay", schedule); if (raf) cancelAnimationFrame(raf); };
+  }, [duration, reduced, ready, open, source]);
 
   useEffect(() => {
     if (!open) return;
@@ -137,7 +150,7 @@ function ScrollFilm() {
     <section id="top" ref={frameRef} className="film-scroll" aria-label="Scroll through the journey from Earth to the street">
       <div className="film-sticky">
         <img className="film-poster" src={reduced || progress > .7 ? '/media/street-poster.jpg' : '/media/earth-poster.jpg'} alt={reduced ? 'A TTTN microphone in a busy London street' : ''} aria-hidden={!reduced} />
-        {!reduced && <video ref={videoRef} className={`film-video${mediaAvailable ? '' : ' is-unavailable'}`} src="/media/tttn-earth-london-seek.mp4" poster="/media/earth-poster.jpg" muted playsInline preload="auto" aria-hidden="true" onLoadedMetadata={event => { setDuration(event.currentTarget.duration || 10.04); setReady(true); }} />}
+        {!reduced && <video ref={videoRef} className={`film-video${mediaAvailable && source ? '' : ' is-unavailable'}`} src={source} onError={() => { if (source?.startsWith("blob:")) useNativeSource(); }} poster="/media/earth-poster.jpg" muted playsInline preload="auto" aria-hidden="true" onLoadedMetadata={event => { setDuration(event.currentTarget.duration || 10.04); setReady(true); }} />}
         <div className="film-shade" />
         <div className="film-noise" aria-hidden="true" />
         <div className={progress > .7 && !reduced ? "film-inner is-street" : "film-inner"}>
@@ -148,9 +161,10 @@ function ScrollFilm() {
         </div>
         <div className="film-bottom">
           <div className="chapter"><span className="mono muted">NOW PLAYING</span><strong>{chapter}</strong></div>
-          <div className="film-meter" role="progressbar" aria-label="Journey progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)}><span style={{ width: `${progress * 100}%` }} /></div>
+          <div ref={meterRef} className="film-meter" role="progressbar" aria-label="Journey progress" aria-valuemin={0} aria-valuemax={100}><span /></div>
           <div className="film-tools"><span className="mono">SCROLL TO EXPLORE ↓</span><button type="button" onClick={() => setOpen(true)}>Play film ↗</button></div>
         </div>
+        {!reduced && !source && <div className="film-loading" role="status">{failed ? <>Film unavailable. <button type="button" onClick={retry}>Retry</button></> : 'Preparing the journey. Keep exploring while it loads.'}</div>}
         <div className="vertical-label" aria-hidden="true">THE WORLD IS TALKING · ARE YOU LISTENING?</div>
       </div>
     </section>
@@ -250,5 +264,3 @@ function App() {
 }
 
 createRoot(document.getElementById("root")!).render(<React.StrictMode><App /></React.StrictMode>);
-
-

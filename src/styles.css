@@ -20,3 +20,5 @@
 .work-kit{margin-top:1.4rem!important;font-size:.84rem!important}.work-kit .text-link{font-size:.82rem}
 
 .film-video.is-unavailable{opacity:0}
+
+.film-meter span{width:100%;transform-origin:left;transform:scaleX(var(--film-progress,0));will-change:transform}.film-loading{position:absolute;z-index:3;bottom:6rem;left:6vw;font-size:.75rem;color:#e0e1d9}.film-loading button{background:transparent;color:inherit;border:0;text-decoration:underline;min-height:44px}.film-noise{display:none}.film-video{backface-visibility:hidden}

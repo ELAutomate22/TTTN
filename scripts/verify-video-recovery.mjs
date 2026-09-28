@@ -5,7 +5,7 @@ try {
   let failVideo = true;
   await page.route('**/tttn-earth-london-seek.mp4', route => failVideo ? route.abort() : route.continue());
   await page.goto('http://127.0.0.1:5173/', { waitUntil: 'domcontentloaded' });
-  await page.waitForFunction(() => !!document.querySelector('.film-video')?.error);
+  await page.getByRole('button', { name: 'Retry', exact: true }).waitFor();
   if (!(await page.locator('.film-poster').isVisible())) throw new Error('Missing fallback');
   failVideo = false;
   await page.evaluate(() => window.dispatchEvent(new Event('online')));

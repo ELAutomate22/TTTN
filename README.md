@@ -41,3 +41,12 @@ Official references:
 - https://docs.higgsfield.ai/docs/how-to/sdk
 - https://console.higgsfield.ai/models/bytedance/seedance-2.5/text-to-video/api-reference
 
+
+## Buffered scroll playback
+
+The hero downloads the complete 1080p seek video before enabling scrubbing. A local Blob eliminates network range requests during scrubbing; slow connections see a poster and loading message while the rest of the site remains usable. Downloads retry at most three times, with an explicit Retry control. The Blob is released on cleanup. Scroll UI only rerenders at chapter boundaries; the meter uses a CSS transform, and decoding pauses while the hero is offscreen, the tab is hidden, or the full-film player is open. The 36 MB asset is unchanged, so initial buffering still depends on connection speed.
+
+Run node scripts/verify-buffered-film.mjs chromium to test delayed downloads and fully offline forward/reverse seeking. Firefox and WebKit variants require their Playwright browsers installed. Windows test WebKit is not a substitute for real iOS Safari device testing. Deploy the rebuilt dist folder; hosting CSP must permit blob: in media-src (and same-origin fetch in connect-src).
+
+Browsers that reject Blob-backed MP4 automatically fall back to native video loading using the warmed HTTP cache. Offline scrubbing is verified for Chromium and Firefox; the native fallback can still depend on host caching and byte-range support.
+Validation note: Chromium and Firefox pass the buffered-film regression. Windows Playwright WebKit exercises native forward/reverse seeking but reports an unexpected intrinsic width of 1600 for the 1920px asset, so its strict resolution assertion remains failing. Real Safari/iOS and deployed-host validation are still required; no universal zero-lag claim is made.

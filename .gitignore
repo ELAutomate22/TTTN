@@ -5,3 +5,4 @@ dist/
 .preview/
 research/site-*.png
 research/hero-*.png
+.browser-tests/
